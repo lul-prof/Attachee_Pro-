@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}{{ attachee.username }} - AttachéPro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Attachee Details</h1>
+        <a href="{{ url_for('org_manager.attachees') }}" class="btn btn-secondary">Back to Attachees</a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">User Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th>Username:</th>
+                            <td>{{ attachee.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ attachee.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Role:</th>
+                            <td><span class="badge bg-secondary">{{ attachee.role.value }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Created:</th>
+                            <td>{{ attachee.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Login:</th>
+                            <td>
+                                {% if attachee.last_login %}
+                                {{ attachee.last_login.strftime('%Y-%m-%d %H:%M') }}
+                                {% else %}
+                                Never
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile %}
+                    <table class="table">
+                        <tr>
+                            <th>First Name:</th>
+                            <td>{{ profile.first_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Name:</th>
+                            <td>{{ profile.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ profile.phone or 'Not set' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Department:</th>
+                            <td>{{ profile.department or 'Not set' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Supervisor:</th>
+                            <td>{{ profile.supervisor_name or 'Not set' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Start Date:</th>
+                            <td>
+                                {% if profile.start_date %}
+                                {{ profile.start_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                Not set
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>End Date:</th>
+                            <td>
+                                {% if profile.end_date %}
+                                {{ profile.end_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                Not set
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        This attachee has not completed their profile yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Logbook Entries</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in recent_entries %}
+                                <tr>
+                                    <td>{{ entry.title }}</td>
+                                    <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if entry.status == LogbookStatus.DRAFT %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                        {% elif entry.status == LogbookStatus.SUBMITTED %}
+                                        <span class="badge bg-primary">Submitted</span>
+                                        {% elif entry.status == LogbookStatus.ORG_APPROVED %}
+                                        <span class="badge bg-success">Organization Approved</span>
+                                        {% elif entry.status == LogbookStatus.ORG_REJECTED %}
+                                        <span class="badge bg-danger">Organization Rejected</span>
+                                        {% elif entry.status == LogbookStatus.ASSESSOR_APPROVED %}
+                                        <span class="badge bg-success">Assessor Approved</span>
+                                        {% elif entry.status == LogbookStatus.ASSESSOR_REJECTED %}
+                                        <span class="badge bg-danger">Assessor Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if entry.status == LogbookStatus.SUBMITTED %}
+                                        <a href="{{ url_for('org_manager.review_logbook', entry_id=entry.id) }}" class="btn btn-sm btn-primary">Review</a>
+                                        {% else %}
+                                        <a href="{{ url_for('org_manager.review_logbook', entry_id=entry.id) }}" class="btn btn-sm btn-info">View</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No logbook entries found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

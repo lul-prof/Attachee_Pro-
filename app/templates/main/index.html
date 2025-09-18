@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}AttachéPro - Industrial Attachment Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Welcome to AttachéPro</h1>
+        <p class="lead">A comprehensive Industrial Attachment Management System</p>
+        
+        <div class="row mt-5">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">For Attachees</h5>
+                        <p class="card-text">Students and interns can manage their industrial attachment, submit weekly logbooks, and track progress.</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login as Attachee</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">For Assessors</h5>
+                        <p class="card-text">University supervisors can monitor attachees, provide feedback, and grade performance.</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login as Assessor</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">For Organization Managers</h5>
+                        <p class="card-text">Company supervisors can approve registrations, assign supervisors, and monitor progress.</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login as Manager</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">For Administrators</h5>
+                        <p class="card-text">System administrators can manage users, organizations, and view system-wide statistics.</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login as Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

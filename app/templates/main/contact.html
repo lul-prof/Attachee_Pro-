@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - AttachéPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="display-4 mb-4">Contact Us</h1>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2>Get in Touch</h2>
+                <p class="lead">We're here to help with any questions or feedback you may have about AttachéPro.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-4">
+                        <h4><i class="bi bi-envelope"></i> Email</h4>
+                        <p>support@attachepro.com</p>
+                        <p>info@attachepro.com</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h4><i class="bi bi-telephone"></i> Phone</h4>
+                        <p>+254 700 000 000</p>
+                        <p>+254 800 000 000</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h4><i class="bi bi-geo-alt"></i> Address</h4>
+                        <p>AttachéPro Headquarters<br>
+                        123 Tech Avenue<br>
+                        Nairobi, Kenya</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h4><i class="bi bi-clock"></i> Business Hours</h4>
+                        <p>Monday - Friday: 8:00 AM - 5:00 PM<br>
+                        Saturday: 9:00 AM - 1:00 PM<br>
+                        Sunday: Closed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h2>Send Us a Message</h2>
+                <form>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

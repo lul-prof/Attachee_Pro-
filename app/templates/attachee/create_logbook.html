@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ legend }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                            {% for error in form.title.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.date.label(class="form-label") }}
+                            {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else ""), type="date") }}
+                            {% for error in form.date.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.activities.label(class="form-label") }}
+                            {{ form.activities(class="form-control" + (" is-invalid" if form.activities.errors else ""), rows=5) }}
+                            {% for error in form.activities.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.skills_learned.label(class="form-label") }}
+                            {{ form.skills_learned(class="form-control" + (" is-invalid" if form.skills_learned.errors else ""), rows=3) }}
+                            {% for error in form.skills_learned.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.challenges.label(class="form-label") }}
+                            {{ form.challenges(class="form-control" + (" is-invalid" if form.challenges.errors else ""), rows=3) }}
+                            {% for error in form.challenges.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.solutions.label(class="form-label") }}
+                            {{ form.solutions(class="form-control" + (" is-invalid" if form.solutions.errors else ""), rows=3) }}
+                            {% for error in form.solutions.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('attachee.logbook') }}" class="btn btn-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

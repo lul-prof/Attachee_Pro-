@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Features - AttachéPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <h1 class="display-4 mb-4 text-center">AttachéPro Features</h1>
+        <p class="lead text-center mb-5">Discover the powerful features that make AttachéPro the ideal solution for industrial attachment management.</p>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">For Attachees</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Digital logbook submissions</li>
+                            <li class="list-group-item">Progress tracking dashboard</li>
+                            <li class="list-group-item">File uploads for reports and evidence</li>
+                            <li class="list-group-item">Video sessions with assessors</li>
+                            <li class="list-group-item">Feedback and assessment tracking</li>
+                            <li class="list-group-item">Certificate generation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">For Assessors</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Attachee progress monitoring</li>
+                            <li class="list-group-item">Logbook review and feedback</li>
+                            <li class="list-group-item">Video assessment scheduling</li>
+                            <li class="list-group-item">Performance evaluation tools</li>
+                            <li class="list-group-item">Batch processing of submissions</li>
+                            <li class="list-group-item">Reporting and analytics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">For Organizations</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Attachee registration approval</li>
+                            <li class="list-group-item">Supervisor assignment</li>
+                            <li class="list-group-item">Performance monitoring</li>
+                            <li class="list-group-item">Department management</li>
+                            <li class="list-group-item">Attachment program customization</li>
+                            <li class="list-group-item">Completion certificate verification</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Communication Tools</h3>
+                        <p>AttachéPro provides robust communication tools to ensure seamless interaction between all stakeholders:</p>
+                        <ul>
+                            <li>Integrated video conferencing</li>
+                            <li>Real-time notifications</li>
+                            <li>Messaging system</li>
+                            <li>Announcement broadcasts</li>
+                            <li>Email integration</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Security & Compliance</h3>
+                        <p>We prioritize the security and privacy of your data:</p>
+                        <ul>
+                            <li>Secure user authentication</li>
+                            <li>Role-based access control</li>
+                            <li>Data encryption</li>
+                            <li>Regular backups</li>
+                            <li>Compliance with education data regulations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Started Today</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

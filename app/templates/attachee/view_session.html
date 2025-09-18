@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">{{ session.title }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Session Details</h5>
+                    <p><strong>Date:</strong> {{ session.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><strong>Duration:</strong> {{ session.duration_minutes }} minutes</p>
+                    <p><strong>Status:</strong> {{ session.status.value }}</p>
+                    {% if session.notes %}
+                    <p><strong>Notes:</strong> {{ session.notes }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h5>Assessor</h5>
+                    <p><strong>Name:</strong> {{ assessor.username }}</p>
+                    <p><strong>Email:</strong> {{ assessor.email }}</p>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                {% if session.status.value == 'scheduled' %}
+                <a href="{{ url_for('video.join_session', room_id=session.room_id) }}" class="btn btn-success">Join Video Session</a>
+                {% elif session.status.value == 'completed' %}
+                <button class="btn btn-secondary" disabled>Session Completed</button>
+                {% elif session.status.value == 'cancelled' %}
+                <button class="btn btn-danger" disabled>Session Cancelled</button>
+                {% endif %}
+                
+                <a href="{{ url_for('attachee.video_sessions') }}" class="btn btn-outline-primary">Back to Sessions</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

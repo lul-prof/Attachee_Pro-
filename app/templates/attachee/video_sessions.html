@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">My Video Sessions</h1>
+    
+    <!-- Filter Options -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="btn-group">
+                <a href="{{ url_for('attachee.video_sessions', status='all') }}" 
+                   class="btn btn-outline-primary {{ 'active' if status_filter == 'all' else '' }}">
+                    All Sessions
+                </a>
+                <a href="{{ url_for('attachee.video_sessions', status='scheduled') }}" 
+                   class="btn btn-outline-success {{ 'active' if status_filter == 'scheduled' else '' }}">
+                    Scheduled
+                </a>
+                <a href="{{ url_for('attachee.video_sessions', status='completed') }}" 
+                   class="btn btn-outline-secondary {{ 'active' if status_filter == 'completed' else '' }}">
+                    Completed
+                </a>
+                <a href="{{ url_for('attachee.video_sessions', status='cancelled') }}" 
+                   class="btn btn-outline-danger {{ 'active' if status_filter == 'cancelled' else '' }}">
+                    Cancelled
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sessions List -->
+    {% if sessions.items %}
+    <div class="list-group mb-4">
+        {% for session in sessions.items %}
+        <a href="{{ url_for('attachee.view_session', session_id=session.id) }}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ session.title }}</h5>
+                <small>
+                    {% if session.status.value == 'scheduled' %}
+                    <span class="badge bg-success">Scheduled</span>
+                    {% elif session.status.value == 'completed' %}
+                    <span class="badge bg-secondary">Completed</span>
+                    {% elif session.status.value == 'cancelled' %}
+                    <span class="badge bg-danger">Cancelled</span>
+                    {% endif %}
+                </small>
+            </div>
+            <p class="mb-1">Date: {{ session.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+            <p class="mb-1">Assessor: {{ session.assessor.username }}</p>
+            <small>Duration: {{ session.duration_minutes }} minutes</small>
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if sessions.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('attachee.video_sessions', page=sessions.prev_num, status=status_filter) }}">
+                    Previous
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+            {% endif %}
+            
+            {% for page_num in sessions.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+            {% if page_num == sessions.page %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('attachee.video_sessions', page=page_num, status=status_filter) }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+            {% endfor %}
+            
+            {% if sessions.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('attachee.video_sessions', page=sessions.next_num, status=status_filter) }}">
+                    Next
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% else %}
+    <div class="alert alert-info">
+        No video sessions found for the selected filter.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

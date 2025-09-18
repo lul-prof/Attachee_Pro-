@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Review Logbook Entry - AttachéPro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Review Logbook Entry</h1>
+        <a href="{{ url_for('org_manager.logbooks') }}" class="btn btn-secondary">Back to Logbooks</a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ entry.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Date:</strong> {{ entry.date.strftime('%Y-%m-%d') }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Attachee:</strong> 
+                        <a href="{{ url_for('org_manager.view_attachee', attachee_id=attachee.id) }}">
+                            {{ attachee.username }}
+                        </a>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Status:</strong>
+                        {% if entry.status == LogbookStatus.DRAFT %}
+                        <span class="badge bg-secondary">Draft</span>
+                        {% elif entry.status == LogbookStatus.SUBMITTED %}
+                        <span class="badge bg-primary">Submitted</span>
+                        {% elif entry.status == LogbookStatus.ORG_APPROVED %}
+                        <span class="badge bg-success">Organization Approved</span>
+                        {% elif entry.status == LogbookStatus.ORG_REJECTED %}
+                        <span class="badge bg-danger">Organization Rejected</span>
+                        {% elif entry.status == LogbookStatus.ASSESSOR_APPROVED %}
+                        <span class="badge bg-success">Assessor Approved</span>
+                        {% elif entry.status == LogbookStatus.ASSESSOR_REJECTED %}
+                        <span class="badge bg-danger">Assessor Rejected</span>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Activities:</strong>
+                        <div class="card">
+                            <div class="card-body bg-light">
+                                {{ entry.activities|nl2br }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if entry.learning_outcomes %}
+                    <div class="mb-3">
+                        <strong>Learning Outcomes:</strong>
+                        <div class="card">
+                            <div class="card-body bg-light">
+                                {{ entry.learning_outcomes|nl2br }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if entry.org_feedback %}
+                    <div class="mb-3">
+                        <strong>Organization Feedback:</strong>
+                        <div class="card">
+                            <div class="card-body bg-light">
+                                {{ entry.org_feedback|nl2br }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if entry.assessor_feedback %}
+                    <div class="mb-3">
+                        <strong>Assessor Feedback:</strong>
+                        <div class="card">
+                            <div class="card-body bg-light">
+                                {{ entry.assessor_feedback|nl2br }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            {% if entry.status == LogbookStatus.SUBMITTED %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Provide Feedback</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('org_manager.review_logbook', entry_id=entry.id) }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.feedback.label(class="form-label") }}
+                            {{ form.feedback(class="form-control", rows=5) }}
+                            {% for error in form.feedback.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label d-block") }}
+                            <div class="btn-group" role="group">
+                                {% for subfield in form.status %}
+                                <div class="form-check form-check-inline">
+                                    {{ subfield(class="btn-check") }}
+                                    {{ subfield.label(class="btn btn-outline-primary") }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% for error in form.status.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Entry Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th>Created:</th>
+                            <td>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Updated:</th>
+                            <td>{{ entry.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% if entry.org_approved_at %}
+                        <tr>
+                            <th>Organization Review:</th>
+                            <td>{{ entry.org_approved_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if entry.assessor_approved_at %}
+                        <tr>
+                            <th>Assessor Review:</th>
+                            <td>{{ entry.assessor_approved_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

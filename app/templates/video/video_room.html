@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .video-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .video-item {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+    .video-item video {
+        width: 100%;
+        border-radius: 8px;
+        background-color: #000;
+    }
+    .video-item .label {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .chat-container {
+        height: 300px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+    }
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    .chat-input {
+        display: flex;
+        border-top: 1px solid #ddd;
+        padding: 10px;
+    }
+    .chat-input input {
+        flex: 1;
+        margin-right: 10px;
+    }
+    .message {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        max-width: 80%;
+    }
+    .message.sent {
+        background-color: #dcf8c6;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+    .message.received {
+        background-color: #f1f0f0;
+        align-self: flex-start;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">{{ session.title }}</h4>
+            <span id="connection-status" class="badge bg-warning">Connecting...</span>
+        </div>
+        <div class="card-body">
+            <div class="video-container">
+                <div class="video-item">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                    <div class="label">You</div>
+                </div>
+                <div class="video-item">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div class="label">{{ other_participant.username }}</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="toggleAudio" class="btn btn-outline-primary">
+                    <i class="fas fa-microphone"></i> Mute
+                </button>
+                <button id="toggleVideo" class="btn btn-outline-primary">
+                    <i class="fas fa-video"></i> Hide Video
+                </button>
+                <button id="shareScreen" class="btn btn-outline-success">
+                    <i class="fas fa-desktop"></i> Share Screen
+                </button>
+                <button id="endCall" class="btn btn-danger">
+                    <i class="fas fa-phone-slash"></i> End Call
+                </button>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <h5>Session Information</h5>
+                    <p><strong>Date:</strong> {{ session.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><strong>Duration:</strong> {{ session.duration_minutes }} minutes</p>
+                    <p><strong>Participant:</strong> {{ other_participant.username }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="chat-container">
+                        <div id="chatMessages" class="chat-messages"></div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" class="form-control" placeholder="Type a message...">
+                            <button id="sendMessage" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Socket.io connection
+        const socket = io();
+        const roomId = '{{ room_id }}';
+        const userId = {{ current_user.id }};
+        const username = '{{ current_user.username }}';
+        
+        // WebRTC variables
+        let localStream;
+        let remoteStream;
+        let peerConnection;
+        let isAudioMuted = false;
+        let isVideoOff = false;
+        
+        // HTML elements
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const toggleAudioBtn = document.getElementById('toggleAudio');
+        const toggleVideoBtn = document.getElementById('toggleVideo');
+        const shareScreenBtn = document.getElementById('shareScreen');
+        const endCallBtn = document.getElementById('endCall');
+        const connectionStatus = document.getElementById('connection-status');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
+        
+        // ICE servers configuration for WebRTC
+        const iceServers = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+        
+        // Initialize WebRTC
+        async function initWebRTC() {
+            try {
+                // Get local media stream
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: true
+                });
+                
+                // Display local video
+                localVideo.srcObject = localStream;
+                
+                // Create remote stream to receive remote video
+                remoteStream = new MediaStream();
+                remoteVideo.srcObject = remoteStream;
+                
+                // Join the room
+                socket.emit('join_room', { room_id: roomId });
+                
+                // Update connection status
+                connectionStatus.textContent = 'Connected';
+                connectionStatus.classList.remove('bg-warning');
+                connectionStatus.classList.add('bg-success');
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                alert('Could not access camera or microphone. Please check permissions.');
+            }
+        }
+        
+        // Create peer connection
+        function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(iceServers);
+            
+            // Add local tracks to peer connection
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+            
+            // Handle ICE candidates
+            peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    socket.emit('ice_candidate', {
+                        room_id: roomId,
+                        candidate: event.candidate
+                    });
+                }
+            };
+            
+            // Handle connection state changes
+            peerConnection.onconnectionstatechange = event => {
+                if (peerConnection.connectionState === 'connected') {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.classList.remove('bg-warning');
+                    connectionStatus.classList.add('bg-success');
+                } else if (peerConnection.connectionState === 'disconnected' || 
+                           peerConnection.connectionState === 'failed') {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.classList.remove('bg-success');
+                    connectionStatus.classList.add('bg-danger');
+                }
+            };
+            
+            // Handle incoming tracks
+            peerConnection.ontrack = event => {
+                event.streams[0].getTracks().forEach(track => {
+                    remoteStream.addTrack(track);
+                });
+            };
+        }
+        
+        // Create and send offer
+        async function createOffer() {
+            createPeerConnection();
+            
+            try {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                
+                socket.emit('offer', {
+                    room_id: roomId,
+                    sdp: peerConnection.localDescription
+                });
+            } catch (error) {
+                console.error('Error creating offer:', error);
+            }
+        }
+        
+        // Handle incoming offer
+        async function handleOffer(offer) {
+            if (!peerConnection) {
+                createPeerConnection();
+            }
+            
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer.sdp));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                socket.emit('answer', {
+                    room_id: roomId,
+                    sdp: peerConnection.localDescription
+                });
+            } catch (error) {
+                console.error('Error handling offer:', error);
+            }
+        }
+        
+        // Handle incoming answer
+        async function handleAnswer(answer) {
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer.sdp));
+            } catch (error) {
+                console.error('Error handling answer:', error);
+            }
+        }
+        
+        // Handle incoming ICE candidate
+        function handleIceCandidate(data) {
+            try {
+                peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (error) {
+                console.error('Error adding ICE candidate:', error);
+            }
+        }
+        
+        // Socket.io event handlers
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            initWebRTC();
+        });
+        
+        socket.on('user_joined', data => {
+            console.log('User joined:', data);
+            // If we're not the one who just joined, create an offer
+            if (data.user_id !== userId) {
+                createOffer();
+            }
+        });
+        
+        socket.on('offer', data => {
+            console.log('Received offer');
+            handleOffer(data);
+        });
+        
+        socket.on('answer', data => {
+            console.log('Received answer');
+            handleAnswer(data);
+        });
+        
+        socket.on('ice_candidate', data => {
+            console.log('Received ICE candidate');
+            handleIceCandidate(data);
+        });
+        
+        socket.on('user_left', data => {
+            console.log('User left:', data);
+            // Update UI to show the other user has left
+            connectionStatus.textContent = 'Peer Disconnected';
+            connectionStatus.classList.remove('bg-success');
+            connectionStatus.classList.add('bg-warning');
+        });
+        
+        socket.on('call_ended', data => {
+            console.log('Call ended by:', data);
+            endCall();
+        });
+        
+        // UI event handlers
+        toggleAudioBtn.addEventListener('click', () => {
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                isAudioMuted = !isAudioMuted;
+                audioTrack.enabled = !isAudioMuted;
+                toggleAudioBtn.innerHTML = isAudioMuted ? 
+                    '<i class="fas fa-microphone-slash"></i> Unmute' : 
+                    '<i class="fas fa-microphone"></i> Mute';
+            }
+        });
+        
+        toggleVideoBtn.addEventListener('click', () => {
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                isVideoOff = !isVideoOff;
+                videoTrack.enabled = !isVideoOff;
+                toggleVideoBtn.innerHTML = isVideoOff ? 
+                    '<i class="fas fa-video-slash"></i> Show Video' : 
+                    '<i class="fas fa-video"></i> Hide Video';
+            }
+        });
+        
+        shareScreenBtn.addEventListener('click', async () => {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true
+                });
+                
+                // Replace video track with screen track
+                const videoTrack = localStream.getVideoTracks()[0];
+                const screenTrack = screenStream.getVideoTracks()[0];
+                
+                // Replace track in peer connection
+                const senders = peerConnection.getSenders();
+                const sender = senders.find(s => s.track.kind === 'video');
+                if (sender) {
+                    sender.replaceTrack(screenTrack);
+                }
+                
+                // Replace track in local stream
+                localStream.removeTrack(videoTrack);
+                localStream.addTrack(screenTrack);
+                
+                // Update local video
+                localVideo.srcObject = localStream;
+                
+                // Handle screen sharing end
+                screenTrack.onended = async () => {
+                    // Get new camera video track
+                    const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const newVideoTrack = newStream.getVideoTracks()[0];
+                    
+                    // Replace track in peer connection
+                    const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    if (sender) {
+                        sender.replaceTrack(newVideoTrack);
+                    }
+                    
+                    // Replace track in local stream
+                    localStream.removeTrack(screenTrack);
+                    localStream.addTrack(newVideoTrack);
+                    
+                    // Update local video
+                    localVideo.srcObject = localStream;
+                };
+            } catch (error) {
+                console.error('Error sharing screen:', error);
+            }
+        });
+        
+        endCallBtn.addEventListener('click', () => {
+            socket.emit('end_call', { room_id: roomId });
+            endCall();
+        });
+        
+        function endCall() {
+            // Close peer connection
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            
+            // Stop local stream tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Redirect to session detail page
+            window.location.href = '{{ url_for("video.session_detail", session_id=session.id) }}';
+        }
+        
+        // Chat functionality
+        sendMessageBtn.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', event => {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+        
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add message to chat
+                addMessageToChat(message, true);
+                
+                // Clear input
+                chatInput.value = '';
+                
+                // Send message through data channel if available
+                // For simplicity, we're not implementing data channels in this example
+                // In a real application, you would use WebRTC data channels for chat
+            }
+        }
+        
+        function addMessageToChat(message, isSent) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isSent ? 'sent' : 'received');
+            messageElement.textContent = message;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

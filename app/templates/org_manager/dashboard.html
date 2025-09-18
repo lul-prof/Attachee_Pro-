@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Organization Manager Dashboard - AttachéPro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Organization Manager Dashboard</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Attachees</h5>
+                    <p class="card-text display-4">{{ attachee_count }}</p>
+                    <a href="{{ url_for('org_manager.attachees') }}" class="text-white">View Attachees</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Logbooks</h5>
+                    <p class="card-text display-4">{{ pending_logbooks }}</p>
+                    <a href="{{ url_for('org_manager.logbooks') }}" class="text-white">Review Logbooks</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Attachees</h5>
+                    <a href="{{ url_for('org_manager.attachees') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attachee in recent_attachees %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('org_manager.view_attachee', attachee_id=attachee.id) }}">
+                                            {{ attachee.username }}
+                                        </a>
+                                    </td>
+                                    <td>{{ attachee.email }}</td>
+                                    <td>{{ attachee.created_at.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No attachees found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Pending Logbook Entries</h5>
+                    <a href="{{ url_for('org_manager.logbooks') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Attachee</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in recent_entries %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('org_manager.review_logbook', entry_id=entry.id) }}">
+                                            {{ entry.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ entry.user.username }}</td>
+                                    <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No pending logbook entries</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('org_manager.attachees') }}" class="btn btn-primary w-100">Manage Attachees</a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('org_manager.logbooks') }}" class="btn btn-success w-100">Review Logbooks</a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('org_manager.organization') }}" class="btn btn-info w-100">Organization Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

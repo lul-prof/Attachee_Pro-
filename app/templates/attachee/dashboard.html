@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Attachee Dashboard</h1>
+    
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Profile</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile %}
+                        <h5>{{ current_user.username }}</h5>
+                        <p>{{ profile.first_name }} {{ profile.last_name }}</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: {{ completion }}%" 
+                                 aria-valuenow="{{ completion }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ completion }}%
+                            </div>
+                        </div>
+                        <p class="small text-muted">Profile Completion</p>
+                    {% else %}
+                        <p>Please complete your profile</p>
+                    {% endif %}
+                    <a href="{{ url_for('attachee.profile') }}" class="btn btn-primary btn-sm">View/Edit Profile</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logbook Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">My Logbook</h5>
+                </div>
+                <div class="card-body">
+                    <h5>Recent Entries</h5>
+                    {% if recent_entries %}
+                        <ul class="list-group list-group-flush">
+                            {% for entry in recent_entries %}
+                                <li class="list-group-item">
+                                    <a href="{{ url_for('attachee.view_logbook_entry', entry_id=entry.id) }}">
+                                        {{ entry.title }}
+                                    </a>
+                                    <span class="badge {% if entry.status.name == 'APPROVED' %}bg-success{% elif entry.status.name == 'REJECTED' %}bg-danger{% else %}bg-warning{% endif %} float-end">
+                                        {{ entry.status.name }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">{{ entry.date.strftime('%Y-%m-%d') }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No recent entries</p>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="{{ url_for('attachee.new_logbook_entry') }}" class="btn btn-success btn-sm">New Entry</a>
+                        <a href="{{ url_for('attachee.logbook') }}" class="btn btn-outline-secondary btn-sm">View All</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Files Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">My Files</h5>
+                </div>
+                <div class="card-body">
+                    <h5>Recent Uploads</h5>
+                    {% if recent_uploads %}
+                        <ul class="list-group list-group-flush">
+                            {% for file in recent_uploads %}
+                                <li class="list-group-item">
+                                    <a href="{{ url_for('attachee.download_file', file_id=file.id) }}">
+                                        {{ file.original_filename }}
+                                    </a>
+                                    <br>
+                                    <small class="text-muted">{{ file.uploaded_at.strftime('%Y-%m-%d') }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No recent uploads</p>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="{{ url_for('attachee.upload_file') }}" class="btn btn-info btn-sm">Upload File</a>
+                        <a href="{{ url_for('attachee.files') }}" class="btn btn-outline-secondary btn-sm">View All</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Row -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Attachment Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3>{{ recent_entries|length }}</h3>
+                                    <p class="text-muted">Recent Entries</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3>{{ recent_uploads|length }}</h3>
+                                    <p class="text-muted">Recent Uploads</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3>{{ completion }}%</h3>
+                                    <p class="text-muted">Profile Completion</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    {% if profile and profile.end_date %}
+                                        {% set days_left = (profile.end_date - profile.start_date).days if profile.start_date else 0 %}
+                                        <h3>{{ days_left }}</h3>
+                                        <p class="text-muted">Days Duration</p>
+                                    {% else %}
+                                        <h3>-</h3>
+                                        <p class="text-muted">Days Duration</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

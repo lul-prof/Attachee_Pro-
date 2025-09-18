@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Attachees - AttachéPro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Attachees</h1>
+        <a href="{{ url_for('org_manager.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('org_manager.attachees') }}" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search by username or email" value="{{ search_term }}">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ url_for('org_manager.attachees') }}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attachee in attachees.items %}
+                        <tr>
+                            <td>{{ attachee.username }}</td>
+                            <td>{{ attachee.email }}</td>
+                            <td>
+                                {% if attachee.profile and attachee.profile.department %}
+                                {{ attachee.profile.department }}
+                                {% else %}
+                                Not set
+                                {% endif %}
+                            </td>
+                            <td>{{ attachee.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('org_manager.view_attachee', attachee_id=attachee.id) }}" class="btn btn-sm btn-info">View</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">No attachees found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if attachees.pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if attachees.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('org_manager.attachees', page=attachees.prev_num, search=search_term) }}">
+                            Previous
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in attachees.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == attachees.page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('org_manager.attachees', page=page_num, search=search_term) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if attachees.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('org_manager.attachees', page=attachees.next_num, search=search_term) }}">
+                            Next
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
