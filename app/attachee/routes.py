@@ -80,10 +80,8 @@ def profile():
         form.university.data = profile.university
         form.course.data = profile.course
         form.year_of_study.data = profile.year_of_study
-        form.department.data = profile.department
         form.start_date.data = profile.start_date
         form.end_date.data = profile.end_date
-        form.skills.data = profile.skills
         form.bio.data = profile.bio
     
     completion = calculate_profile_completion(profile)

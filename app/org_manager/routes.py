@@ -19,10 +19,10 @@ def dashboard():
     # Count users in this organization
     attachee_count = User.query.filter_by(organization_id=org_id, role=UserRole.ATTACHEE).count()
     
-    # Count pending logbook entries - specify the join relationship
+    # Count pending logbook entries - explicitly specify join condition
     pending_logbooks = LogbookEntry.query.join(
         User,
-        LogbookEntry.attachee_id == User.id  # Explicitly specify the join condition
+        LogbookEntry.attachee_id == User.id  # Explicit join condition
     ).filter(
         User.organization_id == org_id,
         LogbookEntry.status == LogbookStatus.SUBMITTED
@@ -34,14 +34,14 @@ def dashboard():
         role=UserRole.ATTACHEE
     ).order_by(User.created_at.desc()).limit(5).all()
     
-    # Get recent logbook entries pending review - specify the join relationship
+    # Get recent logbook entries pending review - explicitly specify join condition
     recent_entries = LogbookEntry.query.join(
         User,
-        LogbookEntry.attachee_id == User.id  # Explicitly specify the join condition
+        LogbookEntry.attachee_id == User.id  # Explicit join condition
     ).filter(
         User.organization_id == org_id,
         LogbookEntry.status == LogbookStatus.SUBMITTED
-    ).order_by(LogbookEntry.created_at.desc()).limit(5).all()  # Also fixed date to created_at
+    ).order_by(LogbookEntry.created_at.desc()).limit(5).all()
     
     return render_template('org_manager/dashboard.html',
                           title='Organization Manager Dashboard',
@@ -84,9 +84,9 @@ def view_attachee(attachee_id):
     attachee = User.query.filter_by(id=attachee_id, organization_id=org_id, role=UserRole.ATTACHEE).first_or_404()
     profile = AttacheeProfile.query.filter_by(user_id=attachee.id).first()
     
-    # Get recent logbook entries
-    recent_entries = LogbookEntry.query.filter_by(user_id=attachee.id)\
-                                .order_by(LogbookEntry.date.desc()).limit(5).all()
+    # Get recent logbook entries - use attachee_id
+    recent_entries = LogbookEntry.query.filter_by(attachee_id=attachee.id)\
+                                .order_by(LogbookEntry.start_date.desc()).limit(5).all()
     
     return render_template('org_manager/view_attachee.html',
                           title=f'Attachee: {attachee.username}',
@@ -103,8 +103,11 @@ def logbooks():
     status_filter = request.args.get('status', 'submitted')
     org_id = current_user.organization_id
     
-    # Base query for logbook entries in this organization
-    query = LogbookEntry.query.join(User).filter(User.organization_id == org_id)
+    # Base query for logbook entries in this organization - explicitly specify join condition
+    query = LogbookEntry.query.join(
+        User,
+        LogbookEntry.attachee_id == User.id  # Explicit join condition
+    ).filter(User.organization_id == org_id)
     
     # Apply status filter if provided
     if status_filter != 'all':
@@ -130,13 +133,16 @@ def review_logbook(entry_id):
     """Review a logbook entry"""
     org_id = current_user.organization_id
     
-    # Get the entry and verify it belongs to an attachee in this organization
-    entry = LogbookEntry.query.join(User).filter(
+    # Get the entry and verify it belongs to an attachee in this organization - explicitly specify join condition
+    entry = LogbookEntry.query.join(
+        User,
+        LogbookEntry.attachee_id == User.id  # Explicit join condition
+    ).filter(
         LogbookEntry.id == entry_id,
         User.organization_id == org_id
     ).first_or_404()
     
-    attachee = User.query.get_or_404(entry.user_id)
+    attachee = User.query.get_or_404(entry.attachee_id)  # Use attachee_id
     
     form = LogbookReviewForm()
     if form.validate_on_submit():

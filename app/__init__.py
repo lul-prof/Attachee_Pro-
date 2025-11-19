@@ -45,7 +45,7 @@ def create_app(config_class=Config):
             db.session.commit()
             print('Admin user created successfully!')
         else:
-            print('Admin user already exists!')
+            print('Admin user already exists!',admin_user.email)
     
     # Register blueprints
     from app.auth.routes import auth_bp as auth

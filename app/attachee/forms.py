@@ -9,12 +9,16 @@ class ProfileForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired(), Length(max=64)])
     last_name = StringField('Last Name', validators=[DataRequired(), Length(max=64)])
     phone = StringField('Phone Number', validators=[DataRequired(), Length(max=20)])
+    university = SelectField('university', coerce=int)
     organization = SelectField('Organization', coerce=int)
-    department = StringField('Department', validators=[Length(max=64)])
+    department = SelectField('department', coerce=int)
+    course = StringField('course', validators=[Length(max=64)])
     supervisor_name = StringField('Supervisor Name', validators=[Length(max=64)])
     supervisor_email = StringField('Supervisor Email', validators=[Length(max=120)])
+    year_of_study = DateField('year_of_study', format='%Y-%m-%d', validators=[Optional()])
     start_date = DateField('Start Date', format='%Y-%m-%d', validators=[Optional()])
     end_date = DateField('End Date', format='%Y-%m-%d', validators=[Optional()])
+    bio = StringField('bio', validators=[Length(max=64)])
     submit = SubmitField('Update Profile')
 
 class LogbookEntryForm(FlaskForm):

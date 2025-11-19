@@ -81,16 +81,16 @@ def view_attachee(attachee_id):
     
     # Get organization if available
     organization = None
-    if profile.organization_id:
+    if profile.user.organization_id:
         organization = Organization.query.get(profile.organization_id)
     
     # Get recent logbook entries
-    recent_entries = LogbookEntry.query.filter_by(user_id=attachee_id)\
-                                .order_by(LogbookEntry.date.desc()).limit(5).all()
+    recent_entries = LogbookEntry.query.filter_by(attachee_id=attachee_id)\
+                                .order_by(LogbookEntry.updated_at.desc()).limit(5).all()
     
     # Get recent file uploads
-    recent_uploads = FileUpload.query.filter_by(user_id=attachee_id)\
-                              .order_by(FileUpload.upload_date.desc()).limit(5).all()
+    recent_uploads = FileUpload.query.filter_by(attachee_id=attachee_id)\
+                              .order_by(FileUpload.uploaded_at.desc()).limit(5).all()
     
     return render_template('assessor/view_attachee.html',
                           title=f'Attachee: {attachee.username}',
